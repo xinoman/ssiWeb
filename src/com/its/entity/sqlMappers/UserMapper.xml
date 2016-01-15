@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.its.entity.User">
+
+	<resultMap type="com.its.entity.User" id="userResult">
+		<result property="id" column="id" jdbcType="VARCHAR" javaType="java.lang.String" />
+		<result property="username" column="username" />
+		<result property="password" column="password" />
+		<result property="age" column="age" jdbcType="INTEGER" javaType="java.lang.Integer" />
+		<result property="lastLoginTime" column="last_login_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
+	</resultMap>
+	
+	<select id="userLogin" parameterType="user" resultMap="userResult">
+		select *
+		from T_USER
+		where
+		username=#{username} and password=#{password}
+	</select>
+
+	<select id="findListBy" resultMap="userResult">
+		select * from T_USER
+	</select>
+
+	<select id="getById" parameterType="String" resultMap="userResult">
+		select *
+		from T_USER where id=#{id}
+	</select>
+
+	<insert id="insert" parameterType="user">
+	    <!-- sys_guid()函数来获取UUID -->
+		<selectKey resultType="String" keyProperty="id" order="BEFORE">   
+	            <![CDATA[select sys_guid()as id from dual]]>
+		</selectKey>
+		<![CDATA[
+			insert into
+			T_USER(id,username,password,age) values(#{id},#{username},#{password},#{age})
+			]]>
+	</insert>
+
+	<update id="update" parameterType="user">
+		update T_USER 
+		<set>
+			<if test="username != null">
+				username=#{username},
+			</if>
+			<if test="password != null">
+				password = #{password},
+			</if>
+			<if test="age != null">
+				age=#{age},
+			</if>
+			<if test="lastLoginTime != null">
+				last_login_time=#{lastLoginTime}
+			</if>
+		</set>
+		where id=#{id}
+	</update>
+	
+	<select id="findResultForPage" parameterType="Map" resultMap="userResult">
+		select * from (select a.*, rownum rn from (select * from t_user) a WHERE ROWNUM &lt;= #{maxResult}) WHERE rn >= #{currentPage}		
+	</select>
+	
+	<select id="count" resultType="Integer">
+		select count(id) from t_user 
+	</select>
+
+	<delete id="deleteById" parameterType="String">
+		delete from T_USER where
+		id=#{id}
+	</delete>
+
+</mapper>
